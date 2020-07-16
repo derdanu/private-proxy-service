@@ -18,7 +18,6 @@ resource "azurerm_subnet" "example" {
   enforce_private_link_service_network_policies = true
 }
 
-
 resource "azurerm_public_ip" "example" {
   name                = "proxy-outbound-pip"
   sku                 = "Standard"
@@ -57,8 +56,6 @@ resource "azurerm_lb_outbound_rule" "example_ext" {
   }
 }
 
-
-
 resource "azurerm_lb" "example" {
   name                = "proxy-lb-internal"
   sku                 = "Standard"
@@ -66,8 +63,8 @@ resource "azurerm_lb" "example" {
   resource_group_name = azurerm_resource_group.example.name
 
   frontend_ip_configuration {
-    name                 = "internal" 
-    subnet_id            = azurerm_subnet.example.id
+    name      = "internal"
+    subnet_id = azurerm_subnet.example.id
   }
 
 }
@@ -96,9 +93,9 @@ resource "azurerm_lb_rule" "example" {
   protocol                       = "Tcp"
   frontend_port                  = 3128
   backend_port                   = 3128
-  frontend_ip_configuration_name = "internal" 
+  frontend_ip_configuration_name = "internal"
   backend_address_pool_id        = azurerm_lb_backend_address_pool.bpepool.id
-  probe_id                      = azurerm_lb_probe.example.id
+  probe_id                       = azurerm_lb_probe.example.id
 }
 
 resource "azurerm_lb_probe" "example" {
@@ -108,7 +105,6 @@ resource "azurerm_lb_probe" "example" {
   port                = 3128
   protocol            = "tcp"
 }
-
 
 resource "azurerm_virtual_machine_scale_set" "example" {
   name                = "proxy-scaleset"
@@ -137,7 +133,7 @@ resource "azurerm_virtual_machine_scale_set" "example" {
     managed_disk_type = "Standard_LRS"
   }
 
-   os_profile {
+  os_profile {
     computer_name_prefix = "proxy"
     admin_username       = var.admin_username
     admin_password       = var.admin_password
@@ -145,15 +141,15 @@ resource "azurerm_virtual_machine_scale_set" "example" {
   }
 
   network_profile {
-    name    = "Networkprofile"
-    primary = true
+    name          = "Networkprofile"
+    primary       = true
     ip_forwarding = true
     ip_configuration {
       name                                   = "IPConfiguration"
       primary                                = true
       subnet_id                              = azurerm_subnet.example.id
       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.bpepool.id, azurerm_lb_backend_address_pool.bpepool_ext.id]
-    #  load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_pool.lbnatpool.id]
+      #  load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_pool.lbnatpool.id]
     }
   }
 }
